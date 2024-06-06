@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -56,12 +56,12 @@ import com.google.common.base.Strings;
  * field) parsed from a String token in another annotation, this is used where
  * target members need to be specified as Strings in order to parse the String
  * representation to something useful.</p>
- * 
+ *
  * <p>In general a <tt>MemberInfo</tt> consists of 4 parts, <span class="ownr">
  * owner</span>, <span class="name">name</span>, <span class="quan">quantifier
  * </span> and <span class="desc">descriptor</span>, all of which are optional:
  * </p>
- * 
+ *
  * <table class="selectorTable">
  *   <thead>
  *     <tr>
@@ -99,10 +99,10 @@ import com.google.common.base.Strings;
  *     </tr>
  *   </tbody>
  * </table>
- * 
+ *
  * <p>Any part of the selector can be omitted, though they must appear in the
  * correct order. Some examples:</p>
- * 
+ *
  * <blockquote><code>
  * <del>// selects a method or field called func_1234_a, if there are multiple
  * <br />
@@ -161,7 +161,7 @@ import com.google.common.base.Strings;
  * <span class="name">field_5678_z</span>:<span class="desc">Ljava/lang/String;
  * </span><br />
  * <br />
- * <del>// selects a ctor which takes a single String argument</del><br /> 
+ * <del>// selects a ctor which takes a single String argument</del><br />
  * <span class="name">&lt;init&gt;</span><span
  *      class="desc">(Ljava/lang/String;)V</span><br />
  * <br />
@@ -189,9 +189,9 @@ import com.google.common.base.Strings;
  * <span class="ownr">foo.bar.Baz</span>.<span
  *      class="name">func_1234_a</span><span class="desc">(DDD)V</span>
  * </code></blockquote>
- * 
+ *
  * <h4>Notes</h4>
- * 
+ *
  * <ul>
  *   <li>All whitespace in the selector string is stripped before the selector
  *     is parsed.</li>
@@ -199,7 +199,7 @@ import com.google.common.base.Strings;
  *     form of early validation (prior to injector <tt>require</tt> directives)
  *     that an injection point has matched a required number of targets or to
  *     limit the number of matches it can return.</li>
- *   <li>The syntax for <span class="quan">quantifiers</span> is based on the 
+ *   <li>The syntax for <span class="quan">quantifiers</span> is based on the
  *     syntax for <a href="https://www.regular-expressions.info/refrepeat.html"
  *     target="_top">quantifiers in regular expressions</a>, though more
  *     limited. In particular:
@@ -216,60 +216,60 @@ import com.google.common.base.Strings;
  * </ul>
  */
 public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelectorConstructor {
-    
+
     /**
      * Separator for elements in the path
      */
     private static final String ARROW = "->";
-    
+
     /**
      * Member owner in internal form but without L;, can be null
      */
     private final String owner;
-    
+
     /**
      * Member name, can be null to match any member
      */
     private final String name;
-    
+
     /**
      * Member descriptor, can be null
      */
     private final String desc;
-    
+
     /**
      * Required matches
      */
     private final Quantifier matches;
-    
+
     /**
      * Force this member to report as a field
      */
     private final boolean forceField;
-    
+
     /**
-     * The actual String value passed into the {@link #parse} method 
+     * The actual String value passed into the {@link #parse} method
      */
     private final String input;
-    
+
     /**
-     * The actual String value passed into the {@link #parse} method 
+     * The actual String value passed into the {@link #parse} method
      */
     private final String tail;
-    
+
     /**
      * ctor
-     * 
+     *
      * @param name Member name, must not be null
      * @param matches Quantifier specifying the number of matches required
      */
     public MemberInfo(String name, Quantifier matches) {
         this(name, null, null, matches, null, null);
     }
-    
+
     /**
      * ctor
-     * 
+     *
      * @param name Member name, must not be null
      * @param owner Member owner, can be null otherwise must be in internal form
      *      without L;
@@ -278,10 +278,10 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
     public MemberInfo(String name, String owner, Quantifier matches) {
         this(name, owner, null, matches, null, null);
     }
-    
+
     /**
      * ctor
-     * 
+     *
      * @param name Member name, must not be null
      * @param owner Member owner, can be null otherwise must be in internal form
      *      without L;
@@ -290,10 +290,10 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
     public MemberInfo(String name, String owner, String desc) {
         this(name, owner, desc, Quantifier.DEFAULT, null, null);
     }
-    
+
     /**
      * ctor
-     * 
+     *
      * @param name Member name, must not be null
      * @param owner Member owner, can be null otherwise must be in internal form
      *      without L;
@@ -303,10 +303,10 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
     public MemberInfo(String name, String owner, String desc, Quantifier matches) {
         this(name, owner, desc, matches, null, null);
     }
-    
+
     /**
      * ctor
-     * 
+     *
      * @param name Member name, must not be null
      * @param owner Member owner, can be null otherwise must be in internal form
      *      without L;
@@ -316,10 +316,10 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
     public MemberInfo(String name, String owner, String desc, Quantifier matches, String tail) {
         this(name, owner, desc, matches, tail, null);
     }
-    
+
     /**
      * ctor
-     * 
+     *
      * @param name Member name, must not be null
      * @param owner Member owner, can be null otherwise must be in internal form
      *      without L;
@@ -330,7 +330,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         if (owner != null && owner.contains(".")) {
             throw new IllegalArgumentException("Attempt to instance a MemberInfo with an invalid owner format");
         }
-        
+
         this.owner = owner;
         this.name = name;
         this.desc = desc;
@@ -339,11 +339,11 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         this.tail = tail;
         this.input = input;
     }
-    
+
     /**
      * Initialise a MemberInfo using the supplied insn which must be an instance
      * of MethodInsnNode or FieldInsnNode.
-     * 
+     *
      * @param insn instruction node to copy values from
      */
     public MemberInfo(AbstractInsnNode insn) {
@@ -351,7 +351,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         this.forceField = false;
         this.input = null;
         this.tail = null;
-        
+
         if (insn instanceof MethodInsnNode) {
             MethodInsnNode methodNode = (MethodInsnNode) insn;
             this.owner = methodNode.owner;
@@ -366,10 +366,10 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
             throw new IllegalArgumentException("insn must be an instance of MethodInsnNode or FieldInsnNode");
         }
     }
-    
+
     /**
      * Initialise a MemberInfo using the supplied mapping object
-     * 
+     *
      * @param mapping Mapping object to copy values from
      */
     public MemberInfo(IMapping<?> mapping) {
@@ -381,10 +381,10 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         this.tail = null;
         this.input = null;
     }
-    
+
     /**
      * Initialise a remapped MemberInfo using the supplied mapping object
-     * 
+     *
      * @param method mapping method object to copy values from
      */
     private MemberInfo(MemberInfo remapped, MappingMethod method, boolean setOwner) {
@@ -399,7 +399,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
 
     /**
      * Initialise a remapped MemberInfo with a new name
-     * 
+     *
      * @param original Original MemberInfo
      * @param owner new owner
      */
@@ -412,37 +412,37 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         this.tail = original.tail;
         this.input = null;
     }
-    
+
     @Override
     public ITargetSelector next() {
         return Strings.isNullOrEmpty(this.tail) ? null : MemberInfo.parse(this.tail, null);
     }
-    
+
     @Override
     public String getOwner() {
         return this.owner;
     }
-    
+
     @Override
     public String getName() {
         return this.name;
     }
-    
+
     @Override
     public String getDesc() {
         return this.desc;
     }
-    
+
     @Override
     public int getMinMatchCount() {
         return this.matches.getClampedMin();
     }
-    
+
     @Override
     public int getMaxMatchCount() {
         return this.matches.getClampedMax();
     }
-    
+
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
@@ -453,13 +453,13 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         String quantifier = this.matches.toString();
         String desc = this.desc != null ? this.desc : "";
         String separator = desc.startsWith("(") ? "" : (this.desc != null ? ":" : "");
-        String tail = this.tail != null ? " " + MemberInfo.ARROW + " " + this.tail : ""; 
+        String tail = this.tail != null ? " " + MemberInfo.ARROW + " " + this.tail : "";
         return owner + name + quantifier + separator + desc + tail;
     }
 
     /**
      * Return this MemberInfo as an SRG mapping
-     * 
+     *
      * @return SRG representation of this MemberInfo
      * @deprecated use m.asMethodMapping().serialise() instead
      */
@@ -468,26 +468,26 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         if (!this.isFullyQualified()) {
             throw new MixinException("Cannot convert unqualified reference to SRG mapping");
         }
-        
+
         if (this.desc.startsWith("(")) {
             return this.owner + "/" + this.name + " " + this.desc;
         }
-        
+
         return this.owner + "/" + this.name;
     }
-    
+
     /**
-     * Returns this MemberInfo as a java-style descriptor 
+     * Returns this MemberInfo as a java-style descriptor
      */
     @Override
     public String toDescriptor() {
         if (this.desc == null) {
             return "";
         }
-        
+
         return new SignaturePrinter(this).setFullyQualified(true).toDescriptor();
     }
-    
+
     /**
      * Returns the <em>constructor type</em> represented by this MemberInfo
      */
@@ -496,7 +496,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         if (this.input == null) {
             return null;
         }
-        
+
         String returnType = this.getReturnType();
         if (returnType != null) {
             return returnType;
@@ -512,7 +512,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
 
         return this.desc != null ? this.desc : this.input;
     }
-    
+
     /**
      * Returns the <em>constructor descriptor</em> represented by this
      * MemberInfo, returns null if no descriptor is present.
@@ -521,7 +521,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
     public String toCtorDesc() {
         return Bytecode.changeDescriptorReturnType(this.desc, "V");
     }
-    
+
     /**
      * Get the return type for this MemberInfo, if the decriptor is present,
      * returns null if the descriptor is absent or if this MemberInfo represents
@@ -531,7 +531,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         if (this.desc == null || this.desc.indexOf(')') == -1 || this.desc.indexOf('(') != 0 ) {
             return null;
         }
-        
+
         String returnType = this.desc.substring(this.desc.indexOf(')') + 1);
         if (returnType.startsWith("L") && returnType.endsWith(";")) {
             return returnType.substring(1, returnType.length() - 1);
@@ -547,7 +547,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
     public IMapping<?> asMapping() {
         return this.isField() ? this.asFieldMapping() : this.asMethodMapping();
     }
-    
+
     /**
      * Returns this MemberInfo as a mapping method
      */
@@ -556,14 +556,14 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         if (!this.isFullyQualified()) {
             throw new MixinException("Cannot convert unqualified reference " + this + " to MethodMapping");
         }
-        
+
         if (this.isField()) {
             throw new MixinException("Cannot convert a non-method reference " + this + " to MethodMapping");
         }
-        
+
         return new MappingMethod(this.owner, this.name, this.desc);
     }
-    
+
     /**
      * Returns this MemberInfo as a mapping field
      */
@@ -572,49 +572,49 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         if (!this.isField()) {
             throw new MixinException("Cannot convert non-field reference " + this + " to FieldMapping");
         }
-        
+
         return new MappingField(this.owner, this.name, this.desc);
     }
-    
+
     @Override
     public boolean isFullyQualified() {
         return this.owner != null && this.name != null && this.desc != null;
     }
-    
+
     /**
      * Get whether this MemberInfo is definitely a field, the output of this
      * method is undefined if {@link #isFullyQualified} returns false.
-     * 
+     *
      * @return true if this is definitely a field
      */
     @Override
     public boolean isField() {
         return this.forceField || (this.desc != null && !this.desc.startsWith("("));
     }
-    
+
     /**
      * Get whether this member represents a constructor
-     * 
+     *
      * @return true if member name is <tt>&lt;init&gt;</tt>
      */
     @Override
     public boolean isConstructor() {
         return Constants.CTOR.equals(this.name);
     }
-    
+
     /**
      * Get whether this member represents a class initialiser
-     * 
+     *
      * @return true if member name is <tt>&lt;clinit&gt;</tt>
      */
     @Override
     public boolean isClassInitialiser() {
         return Constants.CLINIT.equals(this.name);
     }
-    
+
     /**
      * Get whether this member represents a constructor or class initialiser
-     * 
+     *
      * @return true if member name is <tt>&lt;init&gt;</tt> or
      *      <tt>&lt;clinit&gt;</tt>
      */
@@ -622,13 +622,13 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
     public boolean isInitialiser() {
         return this.isConstructor() || this.isClassInitialiser();
     }
-    
+
     /**
      * Perform ultra-simple validation of the descriptor, checks that the parts
      * of the descriptor are basically sane.
-     * 
+     *
      * @return fluent
-     * 
+     *
      * @throws InvalidSelectorException if any validation check fails
      */
     @Override
@@ -637,7 +637,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         if (this.getMaxMatchCount() == 0) {
             throw new InvalidMemberDescriptorException(this.input, "Malformed quantifier in selector: " + this.input);
         }
-        
+
         // Extremely naive class name validation, just to spot really egregious errors
         if (this.owner != null) {
             if (!this.owner.matches("(?i)^[\\w\\p{Sc}/]+$")) {
@@ -652,12 +652,12 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
                         + "; to suppress this error");
             }
         }
-        
+
         // Also naive validation, we're looking for stupid errors here
         if (this.name != null && !this.name.matches("(?i)^<?[\\w\\p{Sc}]+>?$")) {
             throw new InvalidMemberDescriptorException(this.input, "Invalid name: " + this.name);
         }
-        
+
         if (this.desc != null) {
             if (!this.desc.matches("^(\\([\\w\\p{Sc}\\[/;]*\\))?\\[*[\\w\\p{Sc}/;]+$")) {
                 throw new InvalidMemberDescriptorException(this.input, "Invalid descriptor: " + this.desc);
@@ -682,7 +682,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
                 } catch (Exception ex) {
                     throw new InvalidMemberDescriptorException(this.input, "Invalid descriptor: " + this.desc);
                 }
-    
+
                 String retString = this.desc.substring(this.desc.indexOf(')') + 1);
                 try {
                     Type retType = Type.getType(retString);
@@ -700,10 +700,10 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
                 }
             }
         }
-        
+
         return this;
     }
-    
+
     /* (non-Javadoc)
      * @see org.spongepowered.asm.mixin.injection.selectors.ITargetSelector
      *      #match(org.spongepowered.asm.util.asm.ElementNode)
@@ -712,7 +712,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
     public <TNode> MatchResult match(ElementNode<TNode> node) {
         return node == null ? MatchResult.NONE : this.matches(node.getOwner(), node.getName(), node.getDesc());
     }
-    
+
     /* (non-Javadoc)
      * @see org.spongepowered.asm.mixin.injection.selectors.ITargetSelector
      *      #matches(java.lang.String, java.lang.String, java.lang.String)
@@ -745,17 +745,17 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         if (obj == null || !(obj instanceof ITargetSelectorByName)) {
             return false;
         }
-        
+
         ITargetSelectorByName other = (ITargetSelectorByName)obj;
         boolean otherForceField = other instanceof MemberInfo ? ((MemberInfo)other).forceField
                 : other instanceof ITargetSelectorRemappable ? ((ITargetSelectorRemappable)other).isField() : false;
-        
+
         return this.compareMatches(other) && this.forceField == otherForceField
                 && Objects.equal(this.owner, other.getOwner())
                 && Objects.equal(this.name, other.getName())
                 && Objects.equal(this.desc, other.getDesc());
     }
-    
+
     /**
      * Compare local match count with match count of other selector
      */
@@ -773,7 +773,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
     public int hashCode() {
         return Objects.hashCode(this.matches, this.owner, this.name, this.desc);
     }
-    
+
     /* (non-Javadoc)
      * @see org.spongepowered.asm.mixin.injection.selectors.ITargetSelector
      *      #mutate(java.lang.String[])
@@ -810,7 +810,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         }
         return this;
     }
-    
+
     /* (non-Javadoc)
      * @see org.spongepowered.asm.mixin.injection.selectors.ITargetSelector
      *      #attach(org.spongepowered.asm.mixin.refmap.IMixinContext)
@@ -822,10 +822,10 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         }
         return this;
     }
-    
+
     /**
      * Create a new version of this member with a different owner
-     * 
+     *
      * @param newOwner New owner for this member
      */
     @Override
@@ -833,12 +833,12 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         if ((newOwner == null && this.owner == null) || (newOwner != null && newOwner.equals(this.owner))) {
             return this;
         }
-        return new MemberInfo(this, newOwner); 
+        return new MemberInfo(this, newOwner);
     }
-    
+
     /**
      * Create a new version of this member with a different descriptor
-     * 
+     *
      * @param newDesc New descriptor for this member
      */
     @Override
@@ -846,12 +846,12 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         if ((newDesc == null && this.desc == null) || (newDesc != null && newDesc.equals(this.desc))) {
             return this;
         }
-        return new MemberInfo(this.name, this.owner, newDesc, this.matches); 
+        return new MemberInfo(this.name, this.owner, newDesc, this.matches);
     }
-    
+
     /**
      * Create a remapped version of this member using the supplied method data
-     * 
+     *
      * @param srgMethod SRG method data to use
      * @param setOwner True to set the owner as well as the name
      * @return New MethodInfo with remapped values
@@ -860,10 +860,10 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
     public ITargetSelectorRemappable remapUsing(MappingMethod srgMethod, boolean setOwner) {
         return new MemberInfo(this, srgMethod, setOwner);
     }
-    
+
     /**
      * Parse a MemberInfo from a string
-     * 
+     *
      * @param input String to parse MemberInfo from
      * @param context Selector context for this parse request
      * @return parsed MemberInfo
@@ -873,7 +873,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         String owner = null;
         String name = Strings.nullToEmpty(input).replaceAll("\\s", "");
         String tail = null;
-        
+
         int arrowPos = name.indexOf(MemberInfo.ARROW);
         if (arrowPos > -1) {
             tail = name.substring(arrowPos + 2);
@@ -883,7 +883,7 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         if (context != null) {
             name = context.remap(name);
         }
-        
+
         int lastDotPos = name.lastIndexOf('.');
         int semiColonPos = name.indexOf(';');
         if (lastDotPos > -1) {
@@ -903,12 +903,12 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
             desc = name.substring(colonPos + 1);
             name = name.substring(0, colonPos);
         }
-        
+
         if ((name.indexOf('/') > -1 || name.indexOf('.') > -1) && owner == null) {
             owner = name;
             name = "";
         }
-        
+
         // Use default quantifier with negative max value. Used to indicate that
         // an explicit quantifier was not parsed from the selector string, this
         // allows us to provide backward-compatible behaviour for injection
@@ -937,17 +937,17 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         } else if (name.indexOf("{") >= 0) {
             quantifier = Quantifier.NONE; // Probably incomplete quantifier
         }
-        
+
         if (name.isEmpty()) {
             name = null;
         }
-        
+
         return new MemberInfo(name, owner, desc, quantifier, tail, input);
     }
 
     /**
      * Return the supplied mapping parsed as a MemberInfo
-     * 
+     *
      * @param mapping mapping to parse
      * @return new MemberInfo
      */

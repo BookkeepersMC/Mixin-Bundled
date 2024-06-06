@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -54,6 +54,7 @@ import org.spongepowered.asm.util.Bytecode;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
+import org.spongepowered.asm.util.asm.MethodNodeEx;
 
 /**
  * Information about an accessor
@@ -355,7 +356,7 @@ public class AccessorInfo extends SpecialMethodInfo {
      * <tt>foo</tt> for example.  
      */
     protected String inflectTarget() {
-        return AccessorInfo.inflectTarget(this.method.name, this.type, this.toString(), this,
+        return AccessorInfo.inflectTarget(MethodNodeEx.getName(this.method), this.type, this.toString(), this,
                 this.mixin.getEnvironment().getOption(Option.DEBUG_VERBOSE));
     }
 

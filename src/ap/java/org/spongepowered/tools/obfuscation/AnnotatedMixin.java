@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -240,7 +240,7 @@ class AnnotatedMixin implements IMixinContext, IAnnotatedElement {
                         return null;
                     }
                     type = this.typeProvider.getSimulatedHandle(softTarget, this.mixin.asType());
-                } else if (type.isImaginary()) {
+                } else if (type.isImaginary() && false) {
                     this.printMessage(MessageType.MIXIN_SOFT_TARGET_NOT_RESOLVED, "Mixin target " + softTarget + " could not be fully resolved.",
                             SuppressedBy.UNRESOLVABLE_TARGET);
                     if (MessageType.MIXIN_SOFT_TARGET_NOT_RESOLVED.isError()) {

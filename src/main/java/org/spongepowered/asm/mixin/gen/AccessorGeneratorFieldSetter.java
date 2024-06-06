@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,6 +31,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.asm.mixin.MixinEnvironment.Option;
 import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.gen.throwables.InvalidAccessorException;
 import org.spongepowered.asm.mixin.transformer.ClassInfo.Method;
 import org.spongepowered.asm.mixin.transformer.MixinTargetContext;
 import org.spongepowered.asm.service.MixinService;
@@ -52,6 +53,11 @@ public class AccessorGeneratorFieldSetter extends AccessorGeneratorField {
     
     @Override
     public void validate() {
+        if (Bytecode.hasFlag(this.info.getClassNode(), Opcodes.ACC_INTERFACE)) {
+            throw new InvalidAccessorException(info, String.format("%s tried to change interface %s::%s",
+                    this.info, this.info.getClassNode().name, this.targetField.name));
+        }
+
         super.validate();
         
         Method method = this.info.getClassInfo().findMethod(this.info.getMethod());

@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -50,6 +50,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.InjectionPoint;
 import org.spongepowered.asm.mixin.injection.selectors.ITargetSelectorDynamic;
 import org.spongepowered.asm.mixin.injection.selectors.TargetSelector;
+import org.spongepowered.asm.mixin.refmap.IClassReferenceMapper;
 import org.spongepowered.asm.mixin.refmap.IReferenceMapper;
 import org.spongepowered.asm.mixin.refmap.ReferenceMapper;
 import org.spongepowered.asm.mixin.refmap.RemappingReferenceMapper;
@@ -57,6 +58,7 @@ import org.spongepowered.asm.mixin.transformer.ext.Extensions;
 import org.spongepowered.asm.mixin.transformer.throwables.InvalidMixinException;
 import org.spongepowered.asm.service.IMixinService;
 import org.spongepowered.asm.service.MixinService;
+import org.spongepowered.asm.util.CompareUtil;
 import org.spongepowered.asm.util.VersionNumber;
 
 import com.google.common.base.Joiner;
@@ -723,7 +725,7 @@ final class MixinConfig implements Comparable<MixinConfig>, IMixinConfig {
             }
             // requiredFeatures can be used instead of minVersion going forward
             if (this.requiredFeatures == null || this.requiredFeatures.isEmpty()) {
-                this.logger.error("Mixin config {} does not specify \"minVersion\" or \"requiredFeatures\" property", this.name);
+                this.logger.debug("Mixin config {} does not specify \"minVersion\" or \"requiredFeatures\" property", this.name);
             }
         }
         
@@ -1190,7 +1192,12 @@ final class MixinConfig implements Comparable<MixinConfig>, IMixinConfig {
 //        if (remapped != null) {
 //            return remapped;
 //        }
-        return this.getReferenceMapper().remap(className, reference);
+        IReferenceMapper mapper = this.getReferenceMapper();
+        if (mapper instanceof IClassReferenceMapper) {
+            return ((IClassReferenceMapper) mapper).remapClassName(className, reference);
+        } else {
+            return mapper.remap(className, reference);
+        }
     }
     
     /* (non-Javadoc)
@@ -1367,9 +1374,10 @@ final class MixinConfig implements Comparable<MixinConfig>, IMixinConfig {
             return 0;
         }
         if (other.priority == this.priority) {
-            return this.order - other.order;
+            return CompareUtil.compare(this.order, other.order);
+        } else {
+            return (this.priority < other.priority) ? -1 : 1;
         }
-        return (this.priority - other.priority);
     }
     
     /**

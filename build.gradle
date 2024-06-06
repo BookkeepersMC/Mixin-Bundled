@@ -25,9 +25,9 @@ apply plugin: 'potemkin-modules'
 defaultTasks 'licenseFormat', 'check', 'build'
 
 // Basic project information
-group = 'org.spongepowered'
-archivesBaseName = 'mixin'
-version = buildVersion + (buildType == 'RELEASE' ? '' : "-$buildType")
+group = 'com.bookkeepersmc'
+archivesBaseName = 'mixin-bundled'
+version = buildVersion + "-" + extras_version
 
 // Extended project information
 ext.projectName = 'Mixin'
@@ -70,7 +70,7 @@ repositories {
 
 configurations {
     stagingJar
-    
+
     exampleImplementation       .extendsFrom implementation
     fernflowerImplementation    .extendsFrom implementation
     launchwrapperImplementation .extendsFrom implementation
@@ -146,6 +146,7 @@ sourceSets {
         ext.languageVersion = 16
         ext.modularityExcluded = true // don't add ourselves
     }
+    modularityDummy {}
 }
 
 // Because Mixin aims to support a variety of environments, we have to be able to run with older versions of GSON and Guava that lack official module
@@ -160,9 +161,11 @@ potemkinModules {
 // Project dependencies
 dependencies {
     def guava = 'com.google.guava:guava:21.0' // from mc1.12 onwards
-    
+    def gson = 'com.google.code.gson:gson:2.2.4'
+
     implementation guava
     implementation 'com.google.code.gson:gson:2.2.4'
+    implementation 'org.apache.logging.log4j:log4j-core:2.0-beta9'
     if (Float.parseFloat(asmVersion) < 6) {
         implementation "org.ow2.asm:asm-debug-all:$asmVersion"
     }
@@ -173,9 +176,10 @@ dependencies {
     // Annotation Processor
     apImplementation "org.ow2.asm:asm-tree:$asmVersion"
     apImplementation guava
-    
+    apImplementation gson
+
     // Fernflower decompiler
-    fernflowerImplementation 'org.jetbrains.java.decompiler:fernflower:sponge-SNAPSHOT'
+    fernflowerImplementation 'org.jetbrains:intellij-fernflower:1.0.0.9'
 
     // LegacyLauncher service
     launchwrapperImplementation ('net.minecraft:launchwrapper:1.11') {
@@ -183,7 +187,7 @@ dependencies {
         exclude module: 'asm-debug-all'
         exclude module: 'jopt-simple'
     }
-    
+
     modlauncherImplementation 'net.sf.jopt-simple:jopt-simple:5.0.4'
     modlauncherCompileOnly 'org.apache.logging.log4j:log4j-core:2.0-beta9'
     modlauncherImplementation ("cpw.mods:modlauncher:$legacyModlauncherVersion") {
@@ -193,7 +197,7 @@ dependencies {
         exclude module: 'asm-tree'
         exclude module: 'jopt-simple'
     }
-    
+
     modlauncher4Implementation ("cpw.mods:modlauncher:$legacyModlauncherVersion") {
         exclude module: 'asm'
         exclude module: 'asm-analysis'
@@ -201,18 +205,18 @@ dependencies {
         exclude module: 'asm-tree'
         exclude module: 'jopt-simple'
     }
-    
+
     modlauncher9Implementation ("cpw.mods:modlauncher:$modlauncherVersion") {
         exclude module: 'jopt-simple'
     }
     modlauncher9Implementation 'cpw.mods:securejarhandler:2.1.24'
-    
+
     // asm bridge
     bridgeImplementation 'org.apache.logging.log4j:log4j-core:2.0-beta9'
     bridgeImplementation "org.ow2.asm:asm-commons:$legacyForgeAsmVersion"
-    
+
     legacyImplementation "org.ow2.asm:asm-tree:$asmVersion"
-    
+
     modularityCompileOnly 'org.apache.logging.log4j:log4j-core:2.11.2'
 }
 
@@ -245,14 +249,14 @@ eclipse {
             entries.removeAll { it.kind == 'lib' && it.path =~ ~/modlauncher-$legacyModlauncherVersion/ }
             entries.removeAll { it.kind == 'src' && it.path =~ ~/modlauncher4/ }
             entries.removeAll { it.kind == 'lib' && it.path =~ ~/log4j.*beta9/ }
-            
+
             // Mark everything else as a module
             entries.findAll { it.kind == "con" && it.path =~ /gradleclasspathcontainer$/ }.each {
                 it.entryAttributes['module'] = 'true'
             }
         }
     }
-    
+
     project {
         resourceFilter {
             appliesTo = 'FOLDERS'
@@ -263,7 +267,7 @@ eclipse {
             }
         }
     }
-    
+
     // Build service task outputs for test projects
     autoBuildTasks compileModlauncher4Java, compileModlauncher9Java, compileLaunchwrapperJava
 }
@@ -271,7 +275,7 @@ eclipse {
 // Filter, process, and include resources
 processResources {
     // Include in final JAR
-   from 'LICENSE.txt'
+    from 'LICENSE.txt'
 }
 
 // License header formatting
@@ -293,10 +297,10 @@ license {
 
 checkstyle {
     configProperties = [
-        "name"        : project.name,
-        "organization": project.organization,
-        "url"         : project.url,
-        "year"        : project.inceptionYear
+            "name"        : project.name,
+            "organization": project.organization,
+            "url"         : project.url,
+            "year"        : project.inceptionYear
     ]
     configFile = file("checkstyle.xml")
     toolVersion = '8.44'
@@ -316,7 +320,7 @@ project.sourceSets.each { set -> {
         project.tasks[set.compileJavaTaskName].javaCompiler = javaToolchains.compilerFor {
             languageVersion = JavaLanguageVersion.of(set.ext.languageVersion)
         }
-    } 
+    }
     if (set.ext.has("compatibility")) {
         project.tasks[set.compileJavaTaskName].sourceCompatibility = set.ext.compatibility
         project.tasks[set.compileJavaTaskName].targetCompatibility = set.ext.compatibility
@@ -334,8 +338,8 @@ compileModularityJava {
     inputs.files(modularityInputs)
     doFirst {
         options.compilerArgs = [
-            '--module-path', classpath.asPath,
-            '--patch-module', "org.spongepowered.mixin=${modularityInputs.collect { it.absolutePath }.join(File.pathSeparator)}"
+                '--module-path', classpath.asPath,
+                '--patch-module', "org.spongepowered.mixin=${modularityInputs.collect { it.absolutePath }.join(File.pathSeparator)}"
         ]
     }
 }
@@ -352,25 +356,25 @@ task stagingJar(type: ShadowJar) {
         from it.output
     }
     configurations = [project.configurations.stagingJar]
-    
+
     // JAR manifest configuration
     manifest.attributes(
-        "Built-By": System.properties['user.name'],
-        "Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
-        "Implementation-Title": name,
-        "Implementation-Version": project.version + "+" + ciSystem + "-b" + buildNumber + ".git-" + commit,
-        "Implementation-Vendor": url,
-        // for hotswap agent
-        "Premain-Class": "org.spongepowered.tools.agent.MixinAgent",
-        "Agent-Class": "org.spongepowered.tools.agent.MixinAgent",
-        "Can-Redefine-Classes": true,
-        "Can-Retransform-Classes": true
+            "Built-By": System.properties['user.name'],
+            "Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
+            "Implementation-Title": name,
+            "Implementation-Version": project.version + "+" + ciSystem + "-b" + buildNumber + ".git-" + commit,
+            "Implementation-Vendor": url,
+            // for hotswap agent
+            "Premain-Class": "org.spongepowered.tools.agent.MixinAgent",
+            "Agent-Class": "org.spongepowered.tools.agent.MixinAgent",
+            "Can-Redefine-Classes": true,
+            "Can-Retransform-Classes": true
     )
 
     if (project.doSignJar) {
         classifier = 'unsigned'
     }
-    
+
     mergeServiceFiles()
 }
 
@@ -380,39 +384,8 @@ configurations.archives.artifacts.clear()
 // generate shadow jar so we can use the AP standalone
 shadowJar  {
     from sourceSets.ap.output
-    classifier = 'processor'
 }
 build.dependsOn(shadowJar)
-
-if (project.doSignJar) {
-    // Define signjar task    
-    task signJar() {
-        inputs.files(stagingJar.outputs)
-        outputs.files stagingJar.outputs.files.collect {
-            new File(it.parent, it.name.replace('-unsigned', ''))
-        }
-        doLast {
-            stagingJar.outputs.files.each {
-                ant.signjar(
-                    alias: project.keyStoreCert,
-                    jar: it,
-                    signedJar: new File(it.parent, it.name.replace('-unsigned', '')),
-                    keystore: project.keyStorePath,
-                    storepass: project.keyStoreSecret,
-                    keypass: project.keyStoreSecret,
-                    tsaurl: project.timestampAuthority,
-                    preservelastmodified: 'true',
-                    verbose: true,
-                    storetype: project.keyStoreType,
-                    providerclass: project.antSignProviderClass,
-                    providerarg: project.antSignProviderArg
-                )
-            }
-        }
-    }
-    build.dependsOn(signJar)
-}
-
 // Run this task instead of build to generate a timestamped shadow jar (for dev)
 task timestamp(type: Jar, dependsOn: build) {
     if (gradle.startParameter.taskNames.contains(name)) {
@@ -425,13 +398,15 @@ task sourceJar(type: Jar) {
         from it.java
         from it.resources
     }
-	classifier = "sources"
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-	from javadoc.destinationDir
-	classifier = "javadoc"
+    from javadoc.destinationDir
+}
+
+jar {
+    from project(":mixinextras").sourceSets.main.java.srcDirs
 }
 
 artifacts {
@@ -479,45 +454,16 @@ publishing {
             version = project.version
             artifactId = project.archivesBaseName
 
-            if (project.doSignJar) {
-                artifact signJar.outputs.files[0]
-            } else {
-                artifact stagingJar
-            }
+            artifact stagingJar
             artifact sourceJar
             artifact javadocJar
             artifact shadowJar
         }
     }
-    
+
     repositories {
-        if (buildType == 'RELEASE') {
-            if (project.hasProperty("releaseRepo")) {
-                maven {
-                    credentials {
-                        username = project.releaseRepoUsername
-                        password = project.releaseRepoPassword
-                    }
-                    url project.releaseRepo
-                }
-            }
-            if (project.hasProperty("spongeReleaseRepo")) {
-                maven {
-                    credentials {
-                        username = project.spongeUsername
-                        password = project.spongePassword
-                    }
-                    url project.spongeReleaseRepo
-                }
-            }
-        } else if (project.hasProperty("spongeSnapshotRepo")) {
-            maven {
-                credentials {
-                    username = project.spongeUsername
-                    password = project.spongePassword
-                }
-                url project.spongeSnapshotRepo
-            }
+        maven {
+            url = "file://${project.projectDir}/m2/"
         }
     }
 }

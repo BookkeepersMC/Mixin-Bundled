@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -520,6 +520,7 @@ class MixinProcessor {
             for (MixinCoprocessor coprocessor : this.coprocessors) {
                 config.addListener(coprocessor);
             }
+            config.addListener(MixinInheritanceTracker.INSTANCE);
             if (hotSwapper != null) {
                 config.addListener(new IListener() {
                     @Override

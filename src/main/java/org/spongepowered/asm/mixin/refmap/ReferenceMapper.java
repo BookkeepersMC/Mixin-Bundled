@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,6 +30,7 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.tools.Diagnostic.Kind;
 
@@ -72,13 +73,13 @@ public final class ReferenceMapper implements IReferenceMapper, Serializable {
      * by the AP. Each entry is keyed by the owning mixin, with the value map
      * containing the actual remappings for each owner
      */
-    private final Map<String, Map<String, String>> mappings = Maps.newHashMap();
+    private final Map<String, Map<String, String>> mappings = Maps.newTreeMap();
     
     /**
      * All mapping sets, keyed by environment type, eg. "notch", "searge". The
      * format of each map within this map is the same as for {@link #mappings}
      */
-    private final Map<String, Map<String, Map<String, String>>> data = Maps.newHashMap();
+    private final Map<String, Map<String, Map<String, String>>> data = Maps.newTreeMap();
     
     /**
      * True if this refmap cannot be written. Only true for the
@@ -221,20 +222,17 @@ public final class ReferenceMapper implements IReferenceMapper, Serializable {
             return null;
         }
         String conformedReference = reference.replaceAll("\\s", "");
-        if (conformedReference.equals(newReference)) {
-            return null;
-        }
         Map<String, Map<String, String>> mappings = this.mappings;
         if (context != null) {
             mappings = this.data.get(context);
             if (mappings == null) {
-                mappings = Maps.newHashMap();
+                mappings = Maps.newTreeMap();
                 this.data.put(context, mappings);
             }
         }
         Map<String, String> classMappings = mappings.get(className);
         if (classMappings == null) {
-            classMappings = new HashMap<String, String>();
+            classMappings = new TreeMap<String, String>();
             mappings.put(className, classMappings);
         }
         return classMappings.put(conformedReference, newReference);

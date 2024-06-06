@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -100,7 +100,7 @@ public final class MainAttributes {
         }
         
         if ("file".equals(codeSource.getScheme())) {
-            File file = Files.toFile(codeSource);
+            File file = Paths.get(codeSource).toFile();
             
             if (file.isFile()) {
                 Attributes attributes = MainAttributes.getJarAttributes(file);

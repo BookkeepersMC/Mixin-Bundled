@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -240,7 +240,7 @@ public class MixinLaunchPluginLegacy implements ILaunchPluginService, IClassByte
         if (classBytes != null && classBytes.length != 0) {
             ClassNode classNode = new ClassNode();
             ClassReader classReader = new MixinClassReader(classBytes, canonicalName);
-            classReader.accept(classNode, readerFlags);
+            classReader.accept(classNode, 0);
             return classNode;
         }
         

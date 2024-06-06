@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,6 +33,7 @@ import org.spongepowered.asm.logging.ILogger;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.asm.mixin.NotebookUtil;
 import org.spongepowered.asm.mixin.injection.struct.InjectionInfo;
 import org.spongepowered.asm.mixin.transformer.ClassInfo.Method;
 import org.spongepowered.asm.mixin.transformer.MixinInfo.MixinMethodNode;
@@ -73,7 +74,15 @@ class MethodMapper {
     public ClassInfo getClassInfo() {
         return this.info;
     }
-    
+
+    /**
+     * Resets the counters to prepare for application, which can happen multiple times due to hotswap.
+     */
+    public void reset() {
+        this.nextUniqueMethodIndex = 0;
+        this.nextUniqueFieldIndex = 0;
+    }
+
     /**
      * Conforms an injector handler method
      * 
@@ -148,7 +157,11 @@ class MethodMapper {
     private static String getMixinSourceId(MixinInfo mixin, String separator) {
         String sourceId = mixin.getConfig().getCleanSourceId();
         if (sourceId == null) {
-            return "";
+            String modId = NotebookUtil.getModId(mixin.getConfig(), null);
+            if (modId == null) {
+                return "";
+            }
+            return modId + separator;
         }
         if (sourceId.length() > 12) {
             sourceId = sourceId.substring(0, 12);

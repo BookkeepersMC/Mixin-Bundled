@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -114,6 +114,7 @@ public final class ObfuscationServices {
                         for (ObfuscationTypeDescriptor obfType : obfTypes) {
                             try {
                                 ObfuscationType type = ObfuscationType.create(obfType, ap);
+                                ap.printMessage(Kind.OTHER, serviceName + " supports type: \"" + type + "\"");
                                 Set<String> types = supportedTypes.get(serviceName);
                                 if (types == null) {
                                     supportedTypes.put(serviceName, types = new LinkedHashSet<String>());

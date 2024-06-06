@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,10 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 /**
  * Mixin module declaration
  */
+@SuppressWarnings("all")
 module org.spongepowered.mixin {
 
     //
@@ -60,6 +60,10 @@ module org.spongepowered.mixin {
     // Gson, by file name and official module
     requires static com.google.gson;
     requires static gson;
+
+    requires static java.sql;
+
+    requires static jdk.unsupported;
 
     //
     // Exports
@@ -146,4 +150,6 @@ module org.spongepowered.mixin {
     provides org.spongepowered.tools.obfuscation.service.IObfuscationService
         with org.spongepowered.tools.obfuscation.mcp.ObfuscationServiceMCP,
              org.spongepowered.tools.obfuscation.fg3.ObfuscationServiceFG3;
+
+    uses org.spongepowered.include.com.google.common.base.PatternCompiler;
 }

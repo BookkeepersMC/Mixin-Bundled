@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -162,9 +162,10 @@ public abstract class InjectionPoint {
     }
     
     /**
-     * Additional specifier for injection points. <tt>Specifiers</tt> can be
-     * supplied in {@link At} annotations by including a colon (<tt>:</tt>)
-     * character followed by the specifier type (case-sensitive), eg:
+     * Selector type for slice delmiters, ignored for normal injection points.
+     * <tt>Selectors</tt> can be supplied in {@link At} annotations by including
+     * a colon (<tt>:</tt>) character followed by the selector type
+     * (case-sensitive), eg:
      * 
      * <blockquote><pre>&#064;At(value = "INVOKE:LAST", ... )</pre></blockquote>
      */
@@ -268,7 +269,7 @@ public abstract class InjectionPoint {
 
         public static int parse(AnnotationNode at) {
             int flags = 0;
-            if (Annotations.<Boolean>getValue(at, "unsafe", Boolean.FALSE)) {
+            if (Annotations.<Boolean>getValue(at, "unsafe", Boolean.TRUE)) {
                 flags |= InjectionPoint.Flags.UNSAFE;
             }
             return flags;
@@ -345,7 +346,7 @@ public abstract class InjectionPoint {
     }
     
     public Specifier getSpecifier(Specifier defaultSpecifier) {
-        return this.specifier == Specifier.DEFAULT ? defaultSpecifier : this.specifier;
+        return this.specifier;
     }
     
     public String getId() {
@@ -399,6 +400,10 @@ public abstract class InjectionPoint {
      */
     public RestrictTargetLevel getTargetRestriction(IInjectionPointContext context) {
         return this.targetRestriction;
+    }
+
+    public RestrictTargetLevel getCancellationRestriction(IInjectionPointContext context) {
+        return RestrictTargetLevel.METHODS_ONLY;
     }
 
     /**

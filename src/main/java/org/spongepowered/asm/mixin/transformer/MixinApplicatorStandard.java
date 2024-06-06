@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -415,6 +415,7 @@ class MixinApplicatorStandard {
             if (target == null) {
                 // This is just a local field, so add it
                 this.targetClass.fields.add(field);
+                mixin.fieldMerged(field);
                 
                 if (field.signature != null) {
                     if (this.mergeSignatures) {
@@ -733,7 +734,6 @@ class MixinApplicatorStandard {
      * pass
      * 
      * @param mixin Mixin being applied
-     * @param injectorOrder injector order for this pass
      */
     protected void applyPreInjections(MixinTargetContext mixin) {
         mixin.applyPreInjections();

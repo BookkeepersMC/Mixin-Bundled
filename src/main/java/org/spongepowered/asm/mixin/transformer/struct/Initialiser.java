@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -97,10 +97,12 @@ public class Initialiser {
      * receiving constructor. 
      */
     protected static final int[] OPCODE_BLACKLIST = {
-        Opcodes.RETURN, Opcodes.ILOAD, Opcodes.LLOAD, Opcodes.FLOAD, Opcodes.DLOAD, Opcodes.IALOAD, Opcodes.LALOAD, Opcodes.FALOAD, Opcodes.DALOAD,
-        Opcodes.AALOAD, Opcodes.BALOAD, Opcodes.CALOAD, Opcodes.SALOAD, Opcodes.ISTORE, Opcodes.LSTORE, Opcodes.FSTORE, Opcodes.DSTORE,
-        Opcodes.ASTORE, Opcodes.IASTORE, Opcodes.LASTORE, Opcodes.FASTORE, Opcodes.DASTORE, Opcodes.AASTORE, Opcodes.BASTORE, Opcodes.CASTORE,
-        Opcodes.SASTORE
+            Opcodes.RETURN, Opcodes.ILOAD, Opcodes.LLOAD, Opcodes.FLOAD, Opcodes.DLOAD,
+            Opcodes.ISTORE, Opcodes.LSTORE, Opcodes.FSTORE, Opcodes.DSTORE, Opcodes.ASTORE,
+            // Fabric: Array opcodes cause no problems in initialisers and should not be needlessly restricted.
+            //        Opcodes.IALOAD, Opcodes.LALOAD, Opcodes.FALOAD, Opcodes.DALOAD, Opcodes.AALOAD,
+            //        Opcodes.BALOAD, Opcodes.CALOAD, Opcodes.SALOAD, Opcodes.IASTORE, Opcodes.LASTORE,
+            //        Opcodes.FASTORE, Opcodes.DASTORE, Opcodes.AASTORE, Opcodes.BASTORE, Opcodes.CASTORE, Opcodes.SASTORE
     };
 
 
@@ -194,12 +196,17 @@ public class Initialiser {
         Map<LabelNode, LabelNode> labels = Bytecode.cloneLabels(ctor.insns);
         for (AbstractInsnNode node : this.insns) {
             if (node instanceof LabelNode) {
-                continue;
+                labels.put((LabelNode) node, new LabelNode());
+            }
+        }
+        for (AbstractInsnNode node : this.insns) {
+            if (node instanceof LabelNode) {
+                // continue;
             }
             if (node instanceof JumpInsnNode) {
-                throw new InvalidMixinException(this.mixin, "Unsupported JUMP opcode in initialiser in " + this.mixin);
+                // throw new InvalidMixinException(this.mixin, "Unsupported JUMP opcode in initialiser in " + this.mixin);
             }
-            
+
             ctor.insertBefore(marker, node.clone(labels));
         }
     }

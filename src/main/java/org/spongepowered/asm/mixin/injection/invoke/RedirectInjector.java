@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -105,7 +105,7 @@ public class RedirectInjector extends InvokeInjector {
     /**
      * Meta decoration object for redirector target nodes
      */
-    class Meta {
+    public class Meta {
         
         public static final String KEY = "redirector";
 

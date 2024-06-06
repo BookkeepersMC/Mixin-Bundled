@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -538,8 +538,9 @@ public final class Locals {
                 VarInsnNode varInsn = (VarInsnNode)insn;
                 boolean isLoad = insn.getOpcode() >= Opcodes.ILOAD && insn.getOpcode() <= Opcodes.SALOAD;
                 if (isLoad) {
-                    frame[varInsn.var] = Locals.getLocalVariableAt(classNode, method, insn, varInsn.var);
-                    int varSize = frame[varInsn.var].desc != null ? Type.getType(frame[varInsn.var].desc).getSize() : 1;
+                    LocalVariableNode toLoad = Locals.getLocalVariableAt(classNode, method, insn, varInsn.var);
+                    frame[varInsn.var] = toLoad;
+                    int varSize = toLoad != null && toLoad.desc != null ? Type.getType(frame[varInsn.var].desc).getSize() : 1;
                     knownFrameSize = Math.max(knownFrameSize, varInsn.var + varSize);
                     if (settings.hasFlags(Settings.RESURRECT_EXPOSED_ON_LOAD)) {
                         Locals.resurrect(frame, knownFrameSize, settings);

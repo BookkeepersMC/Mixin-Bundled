@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -144,6 +144,19 @@ public final class MixinService {
     }
 
     private void runBootServices() {
+        String serviceCls = System.getProperty("mixin.bootstrapService");
+
+        if (serviceCls != null) {
+            try {
+                IMixinServiceBootstrap bootService = (IMixinServiceBootstrap) Class.forName(serviceCls).getConstructor().newInstance();
+                bootService.bootstrap();;
+                bootedServices.add(bootService.getServiceClassName());
+                return;
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         this.bootstrapServiceLoader = ServiceLoader.<IMixinServiceBootstrap>load(IMixinServiceBootstrap.class, this.getClass().getClassLoader());
         Iterator<IMixinServiceBootstrap> iter = this.bootstrapServiceLoader.iterator();
         while (iter.hasNext()) {
@@ -200,6 +213,19 @@ public final class MixinService {
     }
 
     private IMixinService initService() {
+        String serviceCls = System.getProperty("mixin.service");
+
+        if (serviceCls != null) {
+            try {
+                IMixinService service = (IMixinService) Class.forName(serviceCls).getConstructor().newInstance();
+                if (!service.isValid()) throw new RuntimeException("invalid service "+serviceCls+" configured via system property");
+
+                return service;
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         this.serviceLoader = ServiceLoader.<IMixinService>load(IMixinService.class, this.getClass().getClassLoader());
         Iterator<IMixinService> iter = this.serviceLoader.iterator();
         List<String> badServices = new ArrayList<String>();

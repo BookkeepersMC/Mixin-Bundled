@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -253,6 +253,25 @@ public class MixinTargetContext extends ClassContext implements IMixinContext {
         this.getTarget().methodMerged(method);
         
         Annotations.setVisible(method, MixinMerged.class,
+                "mixin", this.getClassName(),
+                "priority", this.getPriority(),
+                "sessionId", this.sessionId);
+    }
+
+    void addMixinField(FieldNode field) {
+        Annotations.setVisible(field, MixinMerged.class, "mixin", this.getClassName());
+        this.getTarget().addMixinField(field);
+    }
+
+    /**
+     * Callback from the applicator which notifies us that a field was merged
+     *
+     * @param field merged field
+     */
+    void fieldMerged(FieldNode field) {
+        this.getTarget().fieldMerged(field);
+
+        Annotations.setVisible(field, MixinMerged.class,
                 "mixin", this.getClassName(),
                 "priority", this.getPriority(),
                 "sessionId", this.sessionId);
@@ -867,9 +886,8 @@ public class MixinTargetContext extends ClassContext implements IMixinContext {
     }
     
     private void updateBinding(MethodNode method, MemberRef methodRef, Traversal traversal) {
-        if (Constants.CTOR.equals(method.name)
-                || methodRef.getOwner().equals(this.getTarget().getClassRef())
-                || this.getTarget().getClassRef().startsWith("<")) {
+        if (Constants.CTOR.equals(methodRef.getName())
+                || methodRef.getOwner().equals(this.getTarget().getClassRef())) {
             return;
         }
         
@@ -1112,7 +1130,7 @@ public class MixinTargetContext extends ClassContext implements IMixinContext {
             }
         }
         
-        return this.getTarget().findAliasedField(aliases, field.desc);
+        return this.getTarget().findField(aliases, field.desc);
     }
 
     FieldNode findRemappedField(FieldNode field) {
@@ -1400,6 +1418,11 @@ public class MixinTargetContext extends ClassContext implements IMixinContext {
         }
     }
 
+    InjectionInfo getFirstInjectionInfo() {
+        return injectors.isEmpty() ? null : injectors.get(0);
+    }
+
+
     /**
      * Get all injector order values for injectors in this mixin
      * 
@@ -1433,7 +1456,6 @@ public class MixinTargetContext extends ClassContext implements IMixinContext {
                     this.activities);
         }
     }
-
     /**
      * Apply injectors discovered in the {@link #prepareInjections()} pass
      * 

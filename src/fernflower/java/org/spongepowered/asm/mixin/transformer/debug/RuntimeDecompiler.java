@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -112,7 +112,7 @@ public class RuntimeDecompiler extends IFernflowerLogger implements IDecompiler,
                 mdAddSource.invoke(fernflower, file);
             } catch (ReflectiveOperationException ex) {
                 // Old fernflower
-                fernflower.getStructContext().addSpace(file, true);
+                fernflower.addSource(file);
             }
             
             fernflower.decompileContext();

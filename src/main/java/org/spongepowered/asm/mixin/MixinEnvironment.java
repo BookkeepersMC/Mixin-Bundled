@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -51,12 +51,7 @@ import org.spongepowered.asm.service.ITransformer;
 import org.spongepowered.asm.service.ITransformerProvider;
 import org.spongepowered.asm.service.MixinService;
 import org.spongepowered.asm.service.MixinServiceAbstract;
-import org.spongepowered.asm.util.Constants;
-import org.spongepowered.asm.util.IConsumer;
-import org.spongepowered.asm.util.ITokenProvider;
-import org.spongepowered.asm.util.JavaVersion;
-import org.spongepowered.asm.util.LanguageFeatures;
-import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.asm.util.*;
 import org.spongepowered.asm.util.asm.ASM;
 import org.spongepowered.asm.util.perf.Profiler;
 
@@ -708,33 +703,33 @@ public final class MixinEnvironment implements ITokenProvider {
             }
             
         },
-        
+
         /**
          * Java 12 or above is required
          */
         JAVA_12(12, Opcodes.V12, LanguageFeatures.METHODS_IN_INTERFACES | LanguageFeatures.PRIVATE_SYNTHETIC_METHODS_IN_INTERFACES
                 | LanguageFeatures.PRIVATE_METHODS_IN_INTERFACES | LanguageFeatures.NESTING | LanguageFeatures.DYNAMIC_CONSTANTS) {
-            
+
             @Override
             boolean isSupported() {
                 return JavaVersion.current() >= JavaVersion.JAVA_12 && ASM.isAtLeastVersion(7);
             }
-            
+
         },
-        
+
         /**
          * Java 13 or above is required
          */
         JAVA_13(13, Opcodes.V13, LanguageFeatures.METHODS_IN_INTERFACES | LanguageFeatures.PRIVATE_SYNTHETIC_METHODS_IN_INTERFACES
                 | LanguageFeatures.PRIVATE_METHODS_IN_INTERFACES | LanguageFeatures.NESTING | LanguageFeatures.DYNAMIC_CONSTANTS) {
-            
+
             @Override
             boolean isSupported() {
                 return JavaVersion.current() >= JavaVersion.JAVA_13 && ASM.isAtLeastVersion(7);
             }
-            
+
         },
-        
+
         /**
          * Java 14 or above is required. Records are a preview feature in this
          * release.
@@ -742,14 +737,14 @@ public final class MixinEnvironment implements ITokenProvider {
         JAVA_14(14, Opcodes.V14, LanguageFeatures.METHODS_IN_INTERFACES | LanguageFeatures.PRIVATE_SYNTHETIC_METHODS_IN_INTERFACES
                 | LanguageFeatures.PRIVATE_METHODS_IN_INTERFACES | LanguageFeatures.NESTING | LanguageFeatures.DYNAMIC_CONSTANTS
                 | LanguageFeatures.RECORDS) {
-            
+
             @Override
             boolean isSupported() {
                 return JavaVersion.current() >= JavaVersion.JAVA_14 && ASM.isAtLeastVersion(8);
             }
-            
+
         },
-        
+
         /**
          * Java 15 or above is required. Records and sealed classes are preview
          * features in this release.
@@ -757,26 +752,26 @@ public final class MixinEnvironment implements ITokenProvider {
         JAVA_15(15, Opcodes.V15, LanguageFeatures.METHODS_IN_INTERFACES | LanguageFeatures.PRIVATE_SYNTHETIC_METHODS_IN_INTERFACES
                 | LanguageFeatures.PRIVATE_METHODS_IN_INTERFACES | LanguageFeatures.NESTING | LanguageFeatures.DYNAMIC_CONSTANTS
                 | LanguageFeatures.RECORDS | LanguageFeatures.SEALED_CLASSES) {
-            
+
             @Override
             boolean isSupported() {
                 return JavaVersion.current() >= JavaVersion.JAVA_15 && ASM.isAtLeastVersion(9);
             }
-            
+
         },
-        
+
         /**
          * Java 16 or above is required
          */
         JAVA_16(16, Opcodes.V16, LanguageFeatures.METHODS_IN_INTERFACES | LanguageFeatures.PRIVATE_SYNTHETIC_METHODS_IN_INTERFACES
                 | LanguageFeatures.PRIVATE_METHODS_IN_INTERFACES | LanguageFeatures.NESTING | LanguageFeatures.DYNAMIC_CONSTANTS
                 | LanguageFeatures.RECORDS | LanguageFeatures.SEALED_CLASSES) {
-            
+
             @Override
             boolean isSupported() {
                 return JavaVersion.current() >= JavaVersion.JAVA_16 && ASM.isAtLeastVersion(9);
             }
-            
+
         },
         
         /**
@@ -785,14 +780,14 @@ public final class MixinEnvironment implements ITokenProvider {
         JAVA_17(17, Opcodes.V17, LanguageFeatures.METHODS_IN_INTERFACES | LanguageFeatures.PRIVATE_SYNTHETIC_METHODS_IN_INTERFACES
                 | LanguageFeatures.PRIVATE_METHODS_IN_INTERFACES | LanguageFeatures.NESTING | LanguageFeatures.DYNAMIC_CONSTANTS
                 | LanguageFeatures.RECORDS | LanguageFeatures.SEALED_CLASSES) {
-            
+
             @Override
             boolean isSupported() {
                 return JavaVersion.current() >= JavaVersion.JAVA_17 && ASM.isAtLeastVersion(9, 1);
             }
-            
+
         },
-        
+
         /**
          * Java 18 or above is required
          */
@@ -804,7 +799,7 @@ public final class MixinEnvironment implements ITokenProvider {
             boolean isSupported() {
                 return JavaVersion.current() >= JavaVersion.JAVA_18 && ASM.isAtLeastVersion(9, 2);
             }
-            
+
         },
         
         /**
@@ -847,8 +842,22 @@ public final class MixinEnvironment implements ITokenProvider {
                 return JavaVersion.current() >= JavaVersion.JAVA_21 && ASM.isAtLeastVersion(9, 5);
             }
             
-        };
-        
+        },
+
+        /**
+         * Java 22 or above is required
+         */
+        JAVA_22(22, Opcodes.V22, LanguageFeatures.METHODS_IN_INTERFACES | LanguageFeatures.PRIVATE_SYNTHETIC_METHODS_IN_INTERFACES
+                | LanguageFeatures.PRIVATE_METHODS_IN_INTERFACES | LanguageFeatures.NESTING | LanguageFeatures.DYNAMIC_CONSTANTS
+                | LanguageFeatures.RECORDS | LanguageFeatures.SEALED_CLASSES) {
+
+            @Override
+            boolean isSupported() {
+                return JavaVersion.current() >= JavaVersion.JAVA_22 && ASM.isAtLeastVersion(9, 6);
+            }
+        },
+        ;
+
         /**
          * Default compatibility level to use if not specified by the service 
          */
@@ -1197,13 +1206,11 @@ public final class MixinEnvironment implements ITokenProvider {
 
         @Override
         public int compareTo(TokenProviderWrapper other) {
-            if (other == null) {
-                return 0;
-            }
             if (other.priority == this.priority) {
-                return other.order - this.order;
+                return CompareUtil.compare(other.order, this.order);
+            } else {
+                return (other.priority < this.priority) ? -1 : 1;
             }
-            return (other.priority - this.priority);
         }
         
         public IEnvironmentTokenProvider getProvider() {

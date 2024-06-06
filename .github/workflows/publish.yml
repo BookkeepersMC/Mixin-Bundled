@@ -1,0 +1,41 @@
+name: Publish
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Resources
+        uses: actions/checkout@v4
+
+      - name: Checkout M2 Repo
+        uses: actions/checkout@v4
+        with:
+          repository: 'BookkeepersMC/m2'
+          path: './m2/'
+          ref: 'master'
+          token: ${{ secrets.GIT_PAT }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build and Publish
+        run: ./gradlew build publish --stacktrace
+
+      - name: Commit artifacts to m2 repo
+        uses: EndBug/add-and-commit@v9.1.4
+        with:
+          add: './com/'
+          author_name: CrypticVerse
+          cwd: "./m2/"
+          message: "Publish Mixin Bundled"

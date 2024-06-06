@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -67,14 +67,14 @@ public final class Mixins {
     
     private Mixins() {}
     
-//    /**
-//     * Add multiple configurations
-//     * 
-//     * @param configFiles config resources to add
-//     */
-//    public static void addConfigurations(String... configFiles) {
-//        Mixins.addConfigurations(configFiles, null);
-//    }
+   /**
+   * Add multiple configurations
+   *
+   * @param configFiles config resources to add
+   */
+   public static void addConfigurations(String... configFiles) {
+        Mixins.addConfigurations(configFiles, null);
+   }
     
     /**
      * Add multiple configurations
@@ -95,7 +95,7 @@ public final class Mixins {
      * @param configFile path to configuration resource
      */
     public static void addConfiguration(String configFile) {
-        Mixins.createConfiguration(configFile, null, null);
+        Mixins.addConfiguration(configFile, (IMixinConfigSource) null);
     }
     
     /**

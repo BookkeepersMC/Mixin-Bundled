@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,6 +33,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.asm.mixin.injection.InjectionPoint.RestrictTargetLevel;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.invoke.arg.ArgsClassGenerator;
+import org.spongepowered.asm.mixin.injection.invoke.util.InvokeUtil;
 import org.spongepowered.asm.mixin.injection.struct.ArgOffsets;
 import org.spongepowered.asm.mixin.injection.struct.InjectionInfo;
 import org.spongepowered.asm.mixin.injection.struct.InjectionNodes.InjectionNode;
@@ -40,6 +41,8 @@ import org.spongepowered.asm.mixin.injection.struct.Target;
 import org.spongepowered.asm.mixin.injection.struct.Target.Extension;
 import org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException;
 import org.spongepowered.asm.util.Bytecode;
+
+import java.util.Arrays;
 
 /**
  * A bytecode injector which allows a single argument of a chosen method call to
@@ -79,34 +82,34 @@ public class ModifyArgsInjector extends InvokeInjector {
     @Override
     protected void injectAtInvoke(Target target, InjectionNode node) {
         MethodInsnNode targetMethod = (MethodInsnNode)node.getCurrentTarget();
-        Type[] args = Type.getArgumentTypes(targetMethod.desc);
-        ArgOffsets offsets = node.getDecoration(ArgOffsets.KEY);
-        if (offsets != null) {
-            args = offsets.apply(args);
-        }
-        String targetMethodDesc = Type.getMethodDescriptor(Type.getReturnType(targetMethod.desc), args);
-        
-        if (args.length == 0) {
+
+        Type[] originalArgs = InvokeUtil.getOriginalArgs(node);
+        Type[] currentArgs = InvokeUtil.getCurrentArgs(node);
+        if (originalArgs.length == 0) {
             throw new InvalidInjectionException(this.info, "@ModifyArgs injector " + this + " targets a method invocation "
-                    + targetMethod.name + targetMethodDesc + " with no arguments!");
+                    + targetMethod.name + targetMethod.desc + " with no arguments!");
         }
-        
-        String clArgs = this.argsClassGenerator.getArgsClass(targetMethodDesc, this.info.getMixin().getMixin()).getName();
+
+        String originalDesc = Type.getMethodDescriptor(Type.VOID_TYPE, originalArgs);
+        String clArgs = this.argsClassGenerator.getArgsClass(originalDesc, this.info.getMixin().getMixin()).getName();
         boolean withArgs = this.verifyTarget(target);
 
         InsnList insns = new InsnList();
         Extension extraStack = target.extendStack().add(1);
-        
-        this.packArgs(insns, clArgs, targetMethodDesc);
-        
+
+        Type[] extraArgs = Arrays.copyOfRange(currentArgs, originalArgs.length, currentArgs.length);
+        int[] extraArgMap = this.storeArgs(target, extraArgs, insns, 0);
+        this.packArgs(insns, clArgs, originalDesc);
+
         if (withArgs) {
             extraStack.add(target.arguments);
             Bytecode.loadArgs(target.arguments, insns, target.isStatic ? 0 : 1);
         }
-        
+
         this.invokeHandler(insns);
-        this.unpackArgs(insns, clArgs, args);
-        
+        this.unpackArgs(insns, clArgs, originalArgs);
+        this.pushArgs(extraArgs, insns, extraArgMap, 0, extraArgs.length);
+
         extraStack.apply();
         target.insns.insertBefore(targetMethod, insns);
     }
@@ -127,11 +130,11 @@ public class ModifyArgsInjector extends InvokeInjector {
         return false;
     }
 
-    private void packArgs(InsnList insns, String clArgs, String targetMethodDesc) {
-        String factoryDesc = Bytecode.changeDescriptorReturnType(targetMethodDesc, "L" + clArgs + ";");
+    private void packArgs(InsnList insns, String clArgs, String targetDesc) {
+        String factoryDesc = Bytecode.changeDescriptorReturnType(targetDesc, "L" + clArgs + ";");
         insns.add(new MethodInsnNode(Opcodes.INVOKESTATIC, clArgs, "of", factoryDesc, false));
         insns.add(new InsnNode(Opcodes.DUP));
-        
+
         if (!this.isStatic) {
             insns.add(new VarInsnNode(Opcodes.ALOAD, 0));
             insns.add(new InsnNode(Opcodes.SWAP));

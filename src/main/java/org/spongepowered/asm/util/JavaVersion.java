@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -111,7 +111,9 @@ public abstract class JavaVersion {
      * Version number for Java 21
      */
     public static final double JAVA_21 = 21.0;
-    
+
+    public static final double JAVA_22 = 22.0;
+
     private static double current = 0.0;
     
     private JavaVersion() {}

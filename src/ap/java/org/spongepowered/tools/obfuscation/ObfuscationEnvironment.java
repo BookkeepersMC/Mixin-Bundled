@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -244,7 +244,7 @@ public abstract class ObfuscationEnvironment implements IObfuscationEnvironment 
                 return mapping.move(remappedOwner);
             }
             String desc = ObfuscationUtil.mapDescriptor(mapping.getDesc(), this.remapper);
-            return new MappingMethod(remappedOwner, mapping.getSimpleName(), desc);
+            return new MappingMethod(remappedOwner, mapping.getSimpleName(), desc != null ? desc : mapping.getDesc());
         }
         return null;
     }
@@ -271,7 +271,7 @@ public abstract class ObfuscationEnvironment implements IObfuscationEnvironment 
         String desc = method.getDesc();
         if (desc != null) {
             String newDesc = ObfuscationUtil.mapDescriptor(method.getDesc(), this.remapper);
-            if (!newDesc.equals(method.getDesc())) {
+            if (newDesc != null) {
                 desc = newDesc;
                 transformed = true;
             }
@@ -289,7 +289,8 @@ public abstract class ObfuscationEnvironment implements IObfuscationEnvironment 
      */
     @Override
     public String remapDescriptor(String desc) {
-        return ObfuscationUtil.mapDescriptor(desc, this.remapper);
+        String newDesc = ObfuscationUtil.mapDescriptor(desc, this.remapper);
+        return newDesc != null ? newDesc : desc;
     }
     
     /**

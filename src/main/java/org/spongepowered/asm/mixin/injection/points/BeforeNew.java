@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,6 +34,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
+import org.spongepowered.asm.mixin.NotebookUtil;
 import org.spongepowered.asm.mixin.injection.InjectionPoint;
 import org.spongepowered.asm.mixin.injection.InjectionPoint.AtCode;
 import org.spongepowered.asm.mixin.injection.selectors.ITargetSelector;
@@ -118,7 +119,7 @@ public class BeforeNew extends InjectionPoint {
         }
         ITargetSelectorConstructor targetSelector = (ITargetSelectorConstructor)member;
         this.target = targetSelector.toCtorType();
-        this.desc = targetSelector.toCtorDesc();
+        this.desc = NotebookUtil.getCompatibility(data.getContext()) >= NotebookUtil.COMPATIBILITY_0_1_0 ? targetSelector.toCtorDesc() : null;
     }
     
     /**

@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -182,9 +182,6 @@ class AnnotatedMixinElementHandlerInjector extends AnnotatedMixinElementHandler 
     }
 
     public void registerInjector(AnnotatedElementInjector elem) {
-        if (this.mixin.isInterface()) {
-            this.ap.printMessage(MessageType.INJECTOR_IN_INTERFACE, "Injector in interface is unsupported", elem.getElement());
-        }
         
         for (String reference : elem.getAnnotation().<String>getList("method")) {
             this.registerInjectorTarget(elem, reference, TargetSelector.parse(reference, elem), elem + ".method=\"" + reference + "\"");
@@ -297,9 +294,6 @@ class AnnotatedMixinElementHandlerInjector extends AnnotatedMixinElementHandler 
      * and process the references
      */
     public void registerInjectionPoint(AnnotatedElementInjectionPoint elem, String format) {
-        if (this.mixin.isInterface()) {
-            this.ap.printMessage(MessageType.INJECTOR_IN_INTERFACE, "Injector in interface is unsupported", elem.getElement());
-        }
         
         ITargetSelector targetSelector = null;
         String targetReference = elem.getAt().<String>getValue("target");

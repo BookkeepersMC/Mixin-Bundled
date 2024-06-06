@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -157,14 +157,33 @@ final class InnerClassGenerator implements IClassGenerator {
             classNode.accept(classVisitor);
             this.loadCounter++;
         }
-        
+
         /**
-         * Used to remap synthetic accessor methods which have been renamed when
-         * being applied to the target class.
+         * Used to remap fields which have been renamed while being applied to
+         * the target class or by an implementation of IRemapper.
+         *
+         * @see org.spongepowered.asm.mixin.extensibility.IRemapper
+         */
+        @Override
+        public String mapFieldName(String owner, String name, String descriptor) {
+            if (this.ownerName.equals(owner)) {
+                ClassInfo.Field field = this.owner.getClassInfo().findField(name, descriptor, ClassInfo.INCLUDE_ALL);
+                if (field != null) {
+                    return field.getName();
+                }
+            }
+            return super.mapFieldName(owner, name, descriptor);
+        }
+
+        /**
+         * Used to remap methods which have been renamed while being applied to
+         * the target class or by an implementation of IRemapper.
+         *
+         * @see org.spongepowered.asm.mixin.extensibility.IRemapper
          */
         @Override
         public String mapMethodName(String owner, String name, String desc) {
-            if (this.ownerName.equalsIgnoreCase(owner)) {
+            if (this.ownerName.equals(owner)) {
                 Method method = this.owner.getClassInfo().findMethod(name, desc, ClassInfo.INCLUDE_ALL);
                 if (method != null) {
                     return method.getName();

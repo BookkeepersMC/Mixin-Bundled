@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -248,6 +248,7 @@ public abstract class TypeUtils {
      * @return java signature
      */
     public static String getJavaSignature(Element element) {
+
         if (element == null) {
             return "";
         }

@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -87,7 +87,7 @@ import com.google.common.collect.ImmutableList.Builder;
  */
 final class AnnotatedMixins implements IMixinAnnotationProcessor, ITokenProvider, ITypeHandleProvider, IJavadocProvider {
 
-    private static final String MAPID_SYSTEM_PROPERTY = "mixin.target.mapid";
+    private static final String MAPID_SYSTEM_PROPERTY = "notebook.mixin.target.mapid";
     
     private static final String RECOMMENDED_MIXINGRADLE_VERSION = "0.7";
 
@@ -557,6 +557,10 @@ final class AnnotatedMixins implements IMixinAnnotationProcessor, ITokenProvider
      */
     @Override
     public void printMessage(Kind kind, CharSequence msg) {
+        if (kind == Kind.OTHER) {
+            return;
+        }
+
         this.processingEnv.getMessager().printMessage(kind, msg);
     }
 

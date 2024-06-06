@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -70,6 +70,7 @@ import org.spongepowered.asm.service.IMixinService;
 import org.spongepowered.asm.service.MixinService;
 import org.spongepowered.asm.util.Annotations;
 import org.spongepowered.asm.util.Bytecode;
+import org.spongepowered.asm.util.CompareUtil;
 import org.spongepowered.asm.util.LanguageFeatures;
 import org.spongepowered.asm.util.asm.ASM;
 import org.spongepowered.asm.util.asm.MethodNodeEx;
@@ -1342,9 +1343,10 @@ class MixinInfo implements Comparable<MixinInfo>, IMixinInfo {
             return 0;
         }
         if (other.priority == this.priority) {
-            return this.order - other.order;
+           return CompareUtil.compare(this.order, other.order);
+        } else {
+            return (this.priority < other.priority) ? -1 : 1;
         }
-        return (this.priority - other.priority);
     }
 
     /**

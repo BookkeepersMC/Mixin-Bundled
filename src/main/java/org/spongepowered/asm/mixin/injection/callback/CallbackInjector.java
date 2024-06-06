@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,6 +33,7 @@ import java.util.Set;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
+import org.spongepowered.asm.mixin.NotebookUtil;
 import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.InjectionPoint;
@@ -46,6 +47,7 @@ import org.spongepowered.asm.mixin.injection.struct.Target;
 import org.spongepowered.asm.mixin.injection.struct.Target.Extension;
 import org.spongepowered.asm.mixin.injection.throwables.InjectionError;
 import org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException;
+import org.spongepowered.asm.mixin.transformer.MixinInheritanceTracker;
 import org.spongepowered.asm.util.Annotations;
 import org.spongepowered.asm.util.Bytecode;
 import org.spongepowered.asm.util.Constants;
@@ -54,6 +56,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.asm.util.SignaturePrinter;
 
 import com.google.common.base.Strings;
+import org.spongepowered.asm.util.asm.MethodNodeEx;
 
 /**
  * This class is responsible for generating the bytecode for injected callbacks,
@@ -167,6 +170,12 @@ public class CallbackInjector extends Injector {
          */
         private boolean captureArgs = true;
 
+        /**
+         * Whether {@link #handler} uses the {@link CallbackInfo}/
+         * {@link CallbackInfoReturnable} it would normally be passed
+         */
+        final boolean usesCallbackInfo;
+
         Callback(MethodNode handler, Target target, final InjectionNode node, final LocalVariableNode[] locals, boolean captureLocals) {
             this.handler = handler;
             this.target = target;
@@ -206,10 +215,34 @@ public class CallbackInjector extends Injector {
             this.invoke = target.extendStack();
             this.ctor = target.extendStack();
 
-            this.invoke.add(target.arguments.length);
-            if (this.canCaptureLocals) {
-                this.invoke.add(this.localTypes.length - this.frameSize);
+            this.invoke.add().add(handlerArgs);
+
+            int callbackInfoSlot = handlerArgs.length == 1 ? Bytecode.isStatic(handler) ? 0 : 1 : frameSize;
+            boolean seenCallbackInfoUse = false;
+            for (AbstractInsnNode insn : handler.instructions) {
+                if (insn.getType() == AbstractInsnNode.VAR_INSN && insn.getOpcode() == Opcodes.ALOAD && ((VarInsnNode) insn).var == callbackInfoSlot) {
+                    seenCallbackInfoUse = true;
+                    break;
+                }
             }
+            Injector.logger.debug("{} does{} use it's CallbackInfo{}", info, seenCallbackInfoUse ? "" : "n't", Type.VOID_TYPE == target.returnType ? "" : "Returnable");
+            if (!seenCallbackInfoUse && !Bytecode.isStatic(handler) && (handler.access & Opcodes.ACC_FINAL) == 0 && (target.classNode.access & Opcodes.ACC_FINAL) == 0) {
+                String handlerName = handler instanceof MethodNodeEx ? ((MethodNodeEx) handler).getOriginalName() : handler.name;
+                List<MethodNode> childHandlers = MixinInheritanceTracker.INSTANCE.findOverrides(info.getClassInfo(), handler.name, handler.desc);
+                Injector.logger.debug("{} has {} override(s) in child classes", info, childHandlers.size());
+
+                out: for (MethodNode childHandle : childHandlers) {
+                    for (AbstractInsnNode insn : childHandle.instructions) {
+                        if (insn.getType() == AbstractInsnNode.VAR_INSN && insn.getOpcode() == Opcodes.ALOAD && ((VarInsnNode) insn).var == callbackInfoSlot) {
+                            seenCallbackInfoUse = true;
+                            break out; //If a child uses it then the parent will need to receive it
+                        }
+                    }
+                }
+
+                Injector.logger.debug("{} w{} be passed a CallbackInfo{} as a result", info, seenCallbackInfoUse ? "ill" : "on't", Type.VOID_TYPE == target.returnType ? "" : "Returnable");
+            }
+            usesCallbackInfo = seenCallbackInfoUse;
         }
 
         /**
@@ -431,14 +464,16 @@ public class CallbackInjector extends Injector {
     
     @Override
     protected void preInject(Target target, InjectionNode node) {
-        if ((this.localCapture.isCaptureLocals() || this.localCapture.isPrintLocals()) && !node.hasDecoration(CallbackInjector.LOCALS_KEY)) {
+        int notebookCompatibility = NotebookUtil.getCompatibility(info);
+        String decorationKey = CallbackInjector.LOCALS_KEY + ":" + notebookCompatibility;
+        if ((this.localCapture.isCaptureLocals() || this.localCapture.isPrintLocals()) && !node.hasDecoration(decorationKey)) {
             LocalVariableNode[] locals = Locals.getLocalsAt(this.classNode, target.method, node.getCurrentTarget());
             for (int j = 0; j < locals.length; j++) {
                 if (locals[j] != null && locals[j].desc != null && locals[j].desc.startsWith("Lorg/spongepowered/asm/mixin/injection/callback/")) {
                     locals[j] = null;
                 }
             }
-            node.<LocalVariableNode[]>decorate(CallbackInjector.LOCALS_KEY, locals);
+            node.<LocalVariableNode[]>decorate(decorationKey, locals);
         }
     }
 
@@ -449,7 +484,7 @@ public class CallbackInjector extends Injector {
      */
     @Override
     protected void inject(Target target, InjectionNode node) {
-        LocalVariableNode[] locals = node.<LocalVariableNode[]>getDecoration(CallbackInjector.LOCALS_KEY);
+        LocalVariableNode[] locals = node.<LocalVariableNode[]>getDecoration(CallbackInjector.LOCALS_KEY + ":" + NotebookUtil.getCompatibility(info));
         this.inject(new Callback(this.methodNode, target, node, locals, this.localCapture.isCaptureLocals()));
     }
 
@@ -525,13 +560,15 @@ public class CallbackInjector extends Injector {
                 }
             }
         }
-        
-        this.dupReturnValue(callback);
-        if (this.cancellable || this.totalInjections > 1) {
-            this.createCallbackInfo(callback, true);
+
+        if (callback.usesCallbackInfo) {
+            this.dupReturnValue(callback);
+            if (this.cancellable || this.totalInjections < 1) {
+                this.createCallbackInfo(callback, true);
+            }
         }
         this.invokeCallback(callback, callbackMethod);
-        this.injectCancellationCode(callback);
+        if (callback.usesCallbackInfo) this.injectCancellationCode(callback);
         
         callback.inject();
         this.info.notifyInjected(callback.target);
@@ -643,7 +680,9 @@ public class CallbackInjector extends Injector {
      * @param callback callback handle
      */
     private void loadOrCreateCallbackInfo(final Callback callback) {
-        if (this.cancellable || this.totalInjections > 1) {
+        if (!callback.usesCallbackInfo) {
+            callback.add(new InsnNode(Opcodes.ACONST_NULL));
+        } else if (this.cancellable || this.totalInjections > 1) {
             callback.add(new VarInsnNode(Opcodes.ALOAD, this.callbackInfoVar), false, true);
         } else {
             this.createCallbackInfo(callback, false);
@@ -702,6 +741,8 @@ public class CallbackInjector extends Injector {
         if (store) {
             callback.target.addLocalVariable(this.callbackInfoVar, "callbackInfo" + this.callbackInfoVar, "L" + this.callbackInfoClass + ";");
             callback.add(new VarInsnNode(Opcodes.ASTORE, this.callbackInfoVar), false, false, head);
+        } else if (callback.isAtReturn) {
+            callback.target.addLocalVariable(this.callbackInfoVar, "returnValue" + this.callbackInfoVar, callback.target.returnType.getDescriptor());
         }
     }
 
