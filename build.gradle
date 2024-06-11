@@ -35,18 +35,17 @@ ext.inceptionYear = '2014'
 ext.packaging = 'jar'
 
 // Define variables
-ext.buildNumber = project.hasProperty("buildNumber") ? buildNumber : '0'
-ext.ciSystem = project.hasProperty("ciSystem") ? ciSystem : 'unknown'
-ext.commit = project.hasProperty("commit") ? commit : 'unknown'
 ext.asmVersion = project.hasProperty("asmVersion") ? asmVersion : '6.2'
 ext.legacyForgeAsmVersion = project.hasProperty("legacyForgeAsmVersion") ? asmVersion : '5.0.3'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 // True to do jar signing task
 ext.doSignJar = project.hasProperty("keyStorePath")
 
 java {
     modularity.inferModulePath = false
-    toolchain.languageVersion = JavaLanguageVersion.of(ciSystem == 'unknown' ? 16 : 8)
 }
 
 // Project repositories
