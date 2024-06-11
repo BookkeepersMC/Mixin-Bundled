@@ -1,11 +1,14 @@
+
 // Gradle repositories and dependencies
 buildscript {
     repositories {
         gradlePluginPortal()
+        mavenCentral()
     }
     dependencies {
         classpath 'gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:0.16.1'
         classpath 'gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0'
+        classpath 'com.guardsquare:proguard-gradle:' + (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11) ? '7.2.0' : '7.1.0')
     }
 }
 
@@ -38,11 +41,8 @@ ext.packaging = 'jar'
 ext.asmVersion = project.hasProperty("asmVersion") ? asmVersion : '6.2'
 ext.legacyForgeAsmVersion = project.hasProperty("legacyForgeAsmVersion") ? asmVersion : '5.0.3'
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
-
-// True to do jar signing task
-ext.doSignJar = project.hasProperty("keyStorePath")
+// Gradle likes this 16, crashes on 1.8... looking into that.
+sourceCompatibility = '16'
 
 java {
     modularity.inferModulePath = false
@@ -232,6 +232,7 @@ javadoc {
     exclude '**/throwables'
     classpath += sourceSets.legacy.output
     source sourceSets.ap.allJava
+    options.encoding = 'UTF-8'
     exclude {
         it.relativePath.file && it.relativePath.pathString =~ 'tools' && !(it.name =~ /SuppressedBy|package-info/)
     }
@@ -370,17 +371,17 @@ if (JavaVersion.current().isJava8Compatible()) {
 }
 
 task stagingJar(type: ShadowJar) {
-    sourceSets.findAll { !(it.name =~ /example|test/) }.each {
+    sourceSets.findAll { !(it.name =~ /example|test|modularityDummy/) }.each {
         from it.output
     }
     configurations = [project.configurations.stagingJar]
 
     // JAR manifest configuration
     manifest.attributes(
-            "Built-By": System.properties['user.name'],
+            "Built-By": name,
             "Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
             "Implementation-Title": name,
-            "Implementation-Version": project.version + "+" + ciSystem + "-b" + buildNumber + ".git-" + commit,
+            "Implementation-Version": project.version,
             "Implementation-Vendor": url,
             // for hotswap agent
             "Premain-Class": "org.spongepowered.tools.agent.MixinAgent",
@@ -388,10 +389,6 @@ task stagingJar(type: ShadowJar) {
             "Can-Redefine-Classes": true,
             "Can-Retransform-Classes": true
     )
-
-    if (project.doSignJar) {
-        classifier = 'unsigned'
-    }
 
     mergeServiceFiles()
 }
@@ -402,12 +399,13 @@ configurations.archives.artifacts.clear()
 // generate shadow jar so we can use the AP standalone
 shadowJar  {
     from sourceSets.ap.output
+    archiveClassifier = 'processor'
 }
 build.dependsOn(shadowJar)
 // Run this task instead of build to generate a timestamped shadow jar (for dev)
 task timestamp(type: Jar, dependsOn: build) {
     if (gradle.startParameter.taskNames.contains(name)) {
-        shadowJar.classifier = new Date().format('yyyyMMddHHmmss')
+        shadowJar.archiveClassifier = new Date().format('yyyyMMddHHmmss')
     }
 }
 
@@ -416,23 +414,17 @@ task sourceJar(type: Jar) {
         from it.java
         from it.resources
     }
+    archiveClassifier = "sources"
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
-}
-
-jar {
-    from project(":mixinextras").sourceSets.main.java.srcDirs
+    archiveClassifier = "javadoc"
 }
 
 artifacts {
-    if (project.doSignJar) {
-        archives signJar.outputs.files[0]
-    } else {
-        archives stagingJar
-    }
+    archives stagingJar
     archives sourceJar
     archives javadocJar
     archives shadowJar
@@ -480,8 +472,10 @@ publishing {
     }
 
     repositories {
-        maven {
-            url = "file://${project.projectDir}/m2/"
+        repositories {
+            maven {
+                url = "file://${project.projectDir}/m2/"
+            }
         }
     }
 }
