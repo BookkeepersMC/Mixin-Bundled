@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -124,7 +124,12 @@ public class ModifyArgInjector extends InvokeInjector {
         }
 
         target.insns.insertBefore(methodNode, insns);
-        target.extendStack().set(2 - (extraLocals.get() - 1)).apply();
+        Extension extraStack = target.extendStack();
+        if (!isStatic) {
+            extraStack.add();
+        }
+        extraStack.add(methodArgs);
+        extraStack.apply();
         extraLocals.apply();
     }
 

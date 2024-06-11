@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -61,7 +61,7 @@ public enum MixinInheritanceTracker implements MixinConfig.IListener {
 
     public List<MethodNode> findOverrides(String owner, String name, String desc) {
         List<MixinInfo> children = parentMixins.get(owner);
-        if (children == null) return Collections.emptyList();
+        if (children == null) { return Collections.emptyList(); }
 
         List<MethodNode> out = new ArrayList<MethodNode>(children.size());
 
@@ -69,7 +69,7 @@ public enum MixinInheritanceTracker implements MixinConfig.IListener {
             ClassNode node = child.getClassNode(ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
 
             MethodNode method = Bytecode.findMethod(node, name, desc);
-            if (method == null || Bytecode.isStatic(method)) continue;
+            if (method == null || Bytecode.isStatic(method)) { continue; }
 
             switch (Bytecode.getVisibility(method)) {
                 case PRIVATE:
@@ -79,7 +79,7 @@ public enum MixinInheritanceTracker implements MixinConfig.IListener {
                     int ownerSplit = owner.lastIndexOf('/');
                     int childSplit = node.name.lastIndexOf('/');
                     //There is a reasonable chance mixins are in the same package, so it is viable that a package private method is overridden
-                    if (ownerSplit != childSplit || (ownerSplit > 0 && !owner.regionMatches(0, node.name, 0, ownerSplit + 1))) break;
+                    if (ownerSplit != childSplit || (ownerSplit > 0 && !owner.regionMatches(0, node.name, 0, ownerSplit + 1))) { break; }
 
                 default:
                     out.add(method);

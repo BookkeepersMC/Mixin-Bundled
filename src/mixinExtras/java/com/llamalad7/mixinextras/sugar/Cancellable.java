@@ -1,0 +1,55 @@
+/*
+ * This file is part of Mixin, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package com.llamalad7.mixinextras.sugar;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Allows you to receive a cancellable {@link CallbackInfo} or {@link CallbackInfoReturnable} as appropriate
+ * from any kind of injector. This allows you to optionally cancel the target method without being forced to use
+ * {@link Inject @Inject}.
+ * <p>
+ * The same {@link CallbackInfo}s will be passed to every handler method in a chain of
+ * {@link WrapOperation @WrapOperation}s (i.e. any number of {@link WrapOperation @WrapOperation}s and at most one inner
+ * {@link Redirect @Redirect} / {@link ModifyConstant @ModifyConstant}). This means you can choose to use the
+ * {@link CallbackInfo#isCancelled()} and {@link CallbackInfoReturnable#getReturnValue()} methods to see if the wrapped
+ * handler cancelled, so you can respond accordingly.
+ * <p>
+ * See <a href="https://github.com/LlamaLad7/MixinExtras/wiki/Cancellable">the wiki article</a> for more info.
+ */
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.CLASS)
+public @interface Cancellable {
+}

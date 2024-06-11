@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -78,8 +78,10 @@ public class AccessorGeneratorMethodProxy extends AccessorGenerator {
         boolean isInterface = Bytecode.hasFlag(this.info.getClassNode(), Opcodes.ACC_INTERFACE);
         boolean isPrivate = Bytecode.hasFlag(this.targetMethod, Opcodes.ACC_PRIVATE);
         boolean isSynthetic = Bytecode.hasFlag(this.targetMethod, Opcodes.ACC_SYNTHETIC);
-        int opcode = this.targetIsStatic ? Opcodes.INVOKESTATIC : isInterface ? Opcodes.INVOKEINTERFACE : (isPrivate ? Opcodes.INVOKESPECIAL : Opcodes.INVOKEVIRTUAL);
-        method.instructions.add(new MethodInsnNode(opcode, this.info.getClassNode().name, this.targetMethod.name, this.targetMethod.desc, isInterface));
+        int opcode = this.targetIsStatic ? Opcodes.INVOKESTATIC :
+                isInterface ? Opcodes.INVOKEINTERFACE : (isPrivate ? Opcodes.INVOKESPECIAL : Opcodes.INVOKEVIRTUAL);
+        method.instructions.add(new MethodInsnNode(
+                opcode, this.info.getClassNode().name, this.targetMethod.name, this.targetMethod.desc, isInterface));
         method.instructions.add(new InsnNode(this.returnType.getOpcode(Opcodes.IRETURN)));
         return method;
     }

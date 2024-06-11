@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -795,7 +795,8 @@ class MixinPreProcessorStandard {
         } else {
             int includeStatic = (ref.getOpcode() == Opcodes.INVOKESTATIC
                     ? ClassInfo.INCLUDE_STATIC : 0);
-            ClassInfo.Method method = owner.findMethodInHierarchy(ref.getName(), ref.getDesc(), SearchType.ALL_CLASSES, ClassInfo.INCLUDE_PRIVATE | includeStatic);
+            ClassInfo.Method method =
+                    owner.findMethodInHierarchy(ref.getName(), ref.getDesc(), SearchType.ALL_CLASSES, ClassInfo.INCLUDE_PRIVATE | includeStatic);
 
             //Accessors are never renamed, despite it appearing as if they have been
             member = method != null && !method.isAccessor() ? method : null;

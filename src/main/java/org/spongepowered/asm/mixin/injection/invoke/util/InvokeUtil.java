@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,6 +33,9 @@ import org.spongepowered.asm.mixin.injection.struct.InjectionNodes;
 import java.util.Arrays;
 
 public class InvokeUtil {
+    private InvokeUtil() {
+    }
+
     public static Type[] getOriginalArgs(InjectionNodes.InjectionNode node) {
         return Type.getArgumentTypes(((MethodInsnNode) node.getOriginalTarget()).desc);
     }

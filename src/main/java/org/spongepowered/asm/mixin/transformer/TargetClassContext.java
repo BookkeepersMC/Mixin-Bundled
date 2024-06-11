@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -423,7 +423,8 @@ final class TargetClassContext extends ClassContext implements ITargetClassConte
     }
     
     /**
-     * Run extensions before apply and clean up any global state in case this is a hotswap
+     * Run extensions before apply and clean up
+     * any global state in case this is a hotswap
      */
     private void preApply() {
         this.getClassInfo().getMethodMapper().reset();

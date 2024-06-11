@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -220,14 +220,17 @@ public class CallbackInjector extends Injector {
             int callbackInfoSlot = handlerArgs.length == 1 ? Bytecode.isStatic(handler) ? 0 : 1 : frameSize;
             boolean seenCallbackInfoUse = false;
             for (AbstractInsnNode insn : handler.instructions) {
-                if (insn.getType() == AbstractInsnNode.VAR_INSN && insn.getOpcode() == Opcodes.ALOAD && ((VarInsnNode) insn).var == callbackInfoSlot) {
+                if (insn.getType() == AbstractInsnNode.VAR_INSN && insn.getOpcode() ==
+                        Opcodes.ALOAD && ((VarInsnNode) insn).var == callbackInfoSlot) {
                     seenCallbackInfoUse = true;
                     break;
                 }
             }
-            Injector.logger.debug("{} does{} use it's CallbackInfo{}", info, seenCallbackInfoUse ? "" : "n't", Type.VOID_TYPE == target.returnType ? "" : "Returnable");
+            Injector.logger.debug(
+                    "{} does{} use it's CallbackInfo{}", info, seenCallbackInfoUse ? "" : "n't", Type.VOID_TYPE == target.returnType ? "" : "Returnable");
             if (!seenCallbackInfoUse && !Bytecode.isStatic(handler) && (handler.access & Opcodes.ACC_FINAL) == 0 && (target.classNode.access & Opcodes.ACC_FINAL) == 0) {
-                String handlerName = handler instanceof MethodNodeEx ? ((MethodNodeEx) handler).getOriginalName() : handler.name;
+                String handlerName =
+                        handler instanceof MethodNodeEx ? ((MethodNodeEx) handler).getOriginalName() : handler.name;
                 List<MethodNode> childHandlers = MixinInheritanceTracker.INSTANCE.findOverrides(info.getClassInfo(), handler.name, handler.desc);
                 Injector.logger.debug("{} has {} override(s) in child classes", info, childHandlers.size());
 

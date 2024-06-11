@@ -76,6 +76,7 @@ configurations {
     launchwrapperImplementation .extendsFrom implementation
     agentImplementation         .extendsFrom implementation
     modlauncherImplementation   .extendsFrom implementation
+    mixinExtrasImplementation   .extendsFrom implementation
     modlauncher9Implementation  .extendsFrom modlauncherImplementation
     modularityImplementation    .extendsFrom modlauncher9Implementation
     modularityCompileOnly       .extendsFrom compileOnly
@@ -146,6 +147,11 @@ sourceSets {
         ext.languageVersion = 16
         ext.modularityExcluded = true // don't add ourselves
     }
+    mixinExtras {
+        compileClasspath += main.output
+        ext.languageVersion = 8
+        ext.compatibility = '1.8'
+    }
     modularityDummy {}
 }
 
@@ -177,6 +183,9 @@ dependencies {
     apImplementation "org.ow2.asm:asm-tree:$asmVersion"
     apImplementation guava
     apImplementation gson
+
+    mixinExtrasCompileOnly("org.ow2.asm:asm-debug-all:5.2")
+    mixinExtrasCompileOnly("org.apache.commons:commons-lang3:3.3.2")
 
     // Fernflower decompiler
     fernflowerImplementation 'org.jetbrains:intellij-fernflower:1.0.0.9'
@@ -274,6 +283,16 @@ eclipse {
 
 // Filter, process, and include resources
 processResources {
+    inputs.property("extrasversion", project.extras_version)
+
+    filesMatching("fabric.mod.json") {
+        expand "extrasversion": project.extras_version
+    }
+
+    filesMatching("META-INF/**") {
+        expand "extrasversion": project.extras_version
+    }
+
     // Include in final JAR
     from 'LICENSE.txt'
 }

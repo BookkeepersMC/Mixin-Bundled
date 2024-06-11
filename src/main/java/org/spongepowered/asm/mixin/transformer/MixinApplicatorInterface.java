@@ -1,7 +1,7 @@
 /*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
- * Copyright (c) BookkeepersMC <https://www.spongepowered.org>
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -141,7 +141,8 @@ class MixinApplicatorInterface extends MixinApplicatorStandard {
 
         if (injectInfo != null) {
             if (!MixinEnvironment.getCompatibilityLevel().supports(LanguageFeatures.METHODS_IN_INTERFACES)) {
-                throw new InvalidInterfaceMixinException(mixin, injectInfo + " is not supported on interface mixin method " + injectInfo.getMethodName());
+                throw new InvalidInterfaceMixinException(
+                        mixin, injectInfo + " is not supported on interface mixin method " + injectInfo.getMethodName());
             }
         }
     }
@@ -167,7 +168,8 @@ class MixinApplicatorInterface extends MixinApplicatorStandard {
 
     @Override
     protected void checkMethodVisibility(MixinTargetContext mixin, MethodNode mixinMethod) {
-        if (Modifier.isStatic(mixinMethod.access) && !MixinEnvironment.getCompatibilityLevel().supports(LanguageFeatures.PRIVATE_METHODS_IN_INTERFACES)) {
+        if (Modifier.isStatic(mixinMethod.access) &&
+                !MixinEnvironment.getCompatibilityLevel().supports(LanguageFeatures.PRIVATE_METHODS_IN_INTERFACES)) {
             InjectionInfo injectInfo = InjectionInfo.parse(mixin, mixinMethod);
             if (injectInfo != null) {
                 return;
